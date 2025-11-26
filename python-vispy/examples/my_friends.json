@@ -1,0 +1,94 @@
+{
+  "friends": [
+    {
+      "name": "Sarah Johnson",
+      "city": "New York",
+      "latitude": 40.7128,
+      "longitude": -74.0060,
+      "photo": "photos/friends/sarah.jpg",
+      "color": "yellow",
+      "group": "college"
+    },
+    {
+      "name": "Mike Chen",
+      "city": "San Francisco",
+      "latitude": 37.7749,
+      "longitude": -122.4194,
+      "photo": "photos/friends/mike.jpg",
+      "color": "blue",
+      "group": "work"
+    },
+    {
+      "name": "Emma Schmidt",
+      "city": "Berlin",
+      "latitude": 52.5200,
+      "longitude": 13.4050,
+      "photo": "photos/friends/emma.jpg",
+      "color": "green",
+      "group": "college"
+    },
+    {
+      "name": "Carlos Rodriguez",
+      "city": "Madrid",
+      "latitude": 40.4168,
+      "longitude": -3.7038,
+      "photo": "photos/friends/carlos.jpg",
+      "color": "red",
+      "group": "family"
+    },
+    {
+      "name": "Yuki Tanaka",
+      "city": "Tokyo",
+      "latitude": 35.6762,
+      "longitude": 139.6503,
+      "photo": "photos/friends/yuki.jpg",
+      "color": "magenta",
+      "group": "high_school"
+    },
+    {
+      "name": "Olivia Brown",
+      "city": "London",
+      "latitude": 51.5074,
+      "longitude": -0.1278,
+      "photo": "photos/friends/olivia.jpg",
+      "color": "purple",
+      "group": "work"
+    },
+    {
+      "name": "Ahmed Hassan",
+      "city": "Dubai",
+      "latitude": 25.2048,
+      "longitude": 55.2708,
+      "photo": "photos/friends/ahmed.jpg",
+      "color": "orange",
+      "group": "college"
+    },
+    {
+      "name": "Sophie Dubois",
+      "city": "Paris",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "photo": "photos/friends/sophie.jpg",
+      "color": "pink",
+      "group": "family"
+    },
+    {
+      "name": "Marco Rossi",
+      "city": "Rome",
+      "latitude": 41.9028,
+      "longitude": 12.4964,
+      "photo": "photos/friends/marco.jpg",
+      "color": "cyan",
+      "group": "college"
+    },
+    {
+      "name": "Liam Murphy",
+      "city": "Sydney",
+      "latitude": -33.8688,
+      "longitude": 151.2093,
+      "photo": "photos/friends/liam.jpg",
+      "color": "green",
+      "group": "high_school"
+    }
+  ]
+}

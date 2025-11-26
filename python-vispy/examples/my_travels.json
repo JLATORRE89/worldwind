@@ -1,0 +1,68 @@
+{
+  "travels": [
+    {
+      "photo": "photos/paris_eiffel.jpg",
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "title": "Eiffel Tower",
+      "description": "Amazing sunset view from Trocadéro",
+      "date": "2023-06-15"
+    },
+    {
+      "photo": "photos/tokyo_tower.jpg",
+      "latitude": 35.6586,
+      "longitude": 139.7454,
+      "title": "Tokyo Tower",
+      "description": "Night lights were incredible",
+      "date": "2023-09-20"
+    },
+    {
+      "photo": "photos/rome_colosseum.jpg",
+      "latitude": 41.8902,
+      "longitude": 12.4922,
+      "title": "Colosseum",
+      "description": "Ancient Roman history tour",
+      "date": "2023-07-10"
+    },
+    {
+      "photo": "photos/nyc_statue_liberty.jpg",
+      "latitude": 40.6892,
+      "longitude": -74.0445,
+      "title": "Statue of Liberty",
+      "description": "Ferry ride was so much fun!",
+      "date": "2023-05-01"
+    },
+    {
+      "photo": "photos/sydney_opera.jpg",
+      "latitude": -33.8568,
+      "longitude": 151.2153,
+      "title": "Sydney Opera House",
+      "description": "Stunning architecture by the harbor",
+      "date": "2023-11-12"
+    },
+    {
+      "photo": "photos/london_bigben.jpg",
+      "latitude": 51.5007,
+      "longitude": -0.1246,
+      "title": "Big Ben",
+      "description": "Classic London landmark",
+      "date": "2023-08-05"
+    },
+    {
+      "photo": "photos/santorini_sunset.jpg",
+      "latitude": 36.3932,
+      "longitude": 25.4615,
+      "title": "Santorini Sunset",
+      "description": "Most beautiful sunset I've ever seen",
+      "date": "2023-07-25"
+    },
+    {
+      "photo": "photos/dubai_burj.jpg",
+      "latitude": 25.1972,
+      "longitude": 55.2744,
+      "title": "Burj Khalifa",
+      "description": "View from the top was breathtaking",
+      "date": "2023-10-15"
+    }
+  ]
+}

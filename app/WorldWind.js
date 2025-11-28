@@ -1,87 +1,139 @@
-// Create a WorldWindow for the canvas.
-var wwd = new WorldWind.WorldWindow("canvasOne");
+(function () {
+  const canvas = document.getElementById("canvasOne");
+  const apiInput = document.getElementById("apiInput");
+  const connectBtn = document.getElementById("connectBtn");
+  const statusText = document.getElementById("statusText");
+  const baseInfo = document.getElementById("baseInfo");
+  const unitList = document.getElementById("unitList");
 
-wwd.addLayer(new WorldWind.BMNGOneImageLayer());
-wwd.addLayer(new WorldWind.BMNGLandsatLayer());
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    if (window.wwd) {
+      window.wwd.redraw();
+    }
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
 
-wwd.addLayer(new WorldWind.CompassLayer());
-wwd.addLayer(new WorldWind.CoordinatesDisplayLayer(wwd));
-wwd.addLayer(new WorldWind.ViewControlsLayer(wwd));
+  const wwd = new WorldWind.WorldWindow("canvasOne");
+  window.wwd = wwd;
 
-// Add a placemark
-var placemarkLayer = new WorldWind.RenderableLayer();
-wwd.addLayer(placemarkLayer);
+  [
+    new WorldWind.BMNGOneImageLayer(),
+    new WorldWind.BMNGLandsatLayer(),
+    new WorldWind.CompassLayer(),
+    new WorldWind.CoordinatesDisplayLayer(wwd),
+    new WorldWind.ViewControlsLayer(wwd),
+  ].forEach((layer) => wwd.addLayer(layer));
 
-var placemarkAttributes = new WorldWind.PlacemarkAttributes(null);
+  const baseLayer = new WorldWind.RenderableLayer("Base Station");
+  const unitLayer = new WorldWind.RenderableLayer("Units");
+  wwd.addLayer(baseLayer);
+  wwd.addLayer(unitLayer);
 
-placemarkAttributes.imageOffset = new WorldWind.Offset(
-    WorldWind.OFFSET_FRACTION, 0.3,
-    WorldWind.OFFSET_FRACTION, 0.0);
+  const state = {
+    apiUrl: apiInput.value.trim(),
+    timer: null,
+  };
 
-placemarkAttributes.labelAttributes.offset = new WorldWind.Offset(
-    WorldWind.OFFSET_FRACTION, 0.5,
-    WorldWind.OFFSET_FRACTION, 1.0);
+  connectBtn.addEventListener("click", () => {
+    state.apiUrl = apiInput.value.trim();
+    if (!state.apiUrl) {
+      statusText.textContent = "Please enter an API URL.";
+      return;
+    }
+    statusText.textContent = "Connecting…";
+    fetchUnits(true);
+  });
 
-placemarkAttributes.imageSource = WorldWind.configuration.baseUrl + "images/pushpins/plain-red.png";
+  function colorForDistance(distance) {
+    const normalized = Math.min(distance / 150.0, 1.0);
+    const r = normalized;
+    const g = 1.0 - normalized;
+    return new WorldWind.Color(r, g, 0.1, 0.9);
+  }
 
-var position = new WorldWind.Position(55.0, -106.0, 100.0);
-var placemark = new WorldWind.Placemark(position, false, placemarkAttributes);
+  function updateBaseMarker(base) {
+    baseLayer.removeAllRenderables();
+    if (!base || base.lat === undefined || base.lon === undefined) {
+      return;
+    }
+    const attrs = new WorldWind.PlacemarkAttributes(null);
+    attrs.imageColor = WorldWind.Color.CYAN;
+    attrs.labelAttributes.color = WorldWind.Color.CYAN;
+    attrs.imageScale = 1.0;
+    attrs.imageSource =
+      WorldWind.configuration.baseUrl + "images/pushpins/plain-yellow.png";
+    const placemark = new WorldWind.Placemark(
+      new WorldWind.Position(base.lat, base.lon, 10),
+      false,
+      attrs
+    );
+    placemark.label = `Base Station\nLat ${base.lat.toFixed(
+      5
+    )} Lon ${base.lon.toFixed(5)}`;
+    placemark.alwaysOnTop = true;
+    baseLayer.addRenderable(placemark);
+    baseInfo.textContent = `Base @ ${base.lat.toFixed(4)}, ${base.lon.toFixed(
+      4
+    )}`;
+  }
 
-placemark.label = "Placemark\n" +
-    "Lat " + placemark.position.latitude.toPrecision(4).toString() + "\n" +
-    "Lon " + placemark.position.longitude.toPrecision(5).toString();
-placemark.alwaysOnTop = true;
+  function updateUnits(units) {
+    unitLayer.removeAllRenderables();
+    unitList.innerHTML = "";
+    units.forEach((unit) => {
+      const attrs = new WorldWind.PlacemarkAttributes(null);
+      attrs.imageSource =
+        WorldWind.configuration.baseUrl + "images/pushpins/plain-red.png";
+      attrs.imageScale = 0.8;
+      attrs.imageColor = colorForDistance(unit.distance_m || 0.0);
+      const pos = new WorldWind.Position(unit.lat, unit.lon, 50);
+      const placemark = new WorldWind.Placemark(pos, false, attrs);
+      const distance = (unit.distance_m || 0).toFixed(1);
+      placemark.label = `${unit.id}\n${distance} m\nRSSI ${Math.round(
+        unit.rssi || 0
+      )} dBm`;
+      placemark.alwaysOnTop = true;
+      unitLayer.addRenderable(placemark);
 
-placemarkLayer.addRenderable(placemark);
+      const li = document.createElement("li");
+      li.textContent = `${unit.id}: ${distance} m @ ${Math.round(
+        unit.bearing_deg || 0
+      )}° (RSSI ${Math.round(unit.rssi || 0)} dBm)`;
+      unitList.appendChild(li);
+    });
+  }
 
-// Add a polygon
-var polygonLayer = new WorldWind.RenderableLayer();
-wwd.addLayer(polygonLayer);
+  async function fetchUnits(force) {
+    if (!state.apiUrl) {
+      return;
+    }
+    try {
+      const response = await fetch(state.apiUrl, { cache: "no-store" });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const data = await response.json();
+      updateBaseMarker(data.base || {});
+      updateUnits(data.units || []);
+      statusText.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+      wwd.redraw();
+    } catch (err) {
+      console.error(err);
+      statusText.textContent = `Error fetching data: ${err}`;
+    } finally {
+      if (force && state.timer) {
+        clearInterval(state.timer);
+        state.timer = null;
+      }
+      if (!state.timer) {
+        state.timer = setInterval(fetchUnits, 5000);
+      }
+    }
+  }
 
-var polygonAttributes = new WorldWind.ShapeAttributes(null);
-polygonAttributes.interiorColor = new WorldWind.Color(0, 1, 1, 0.75);
-polygonAttributes.outlineColor = WorldWind.Color.BLUE;
-polygonAttributes.drawOutline = true;
-polygonAttributes.applyLighting = true;
-
-var boundaries = [];
-boundaries.push(new WorldWind.Position(20.0, -75.0, 700000.0));
-boundaries.push(new WorldWind.Position(25.0, -85.0, 700000.0));
-boundaries.push(new WorldWind.Position(20.0, -95.0, 700000.0));
-
-var polygon = new WorldWind.Polygon(boundaries, polygonAttributes);
-polygon.extrude = true;
-polygonLayer.addRenderable(polygon);
-
-// Add a COLLADA model
-var modelLayer = new WorldWind.RenderableLayer();
-wwd.addLayer(modelLayer);
-
-var position = new WorldWind.Position(10.0, -125.0, 800000.0);
-var config = {dirPath: WorldWind.configuration.baseUrl + 'examples/collada_models/duck/'};
-
-var colladaLoader = new WorldWind.ColladaLoader(position, config);
-colladaLoader.load("duck.dae", function (colladaModel) {
-    colladaModel.scale = 9000;
-    modelLayer.addRenderable(colladaModel);
-});
-
-// Add WMS imagery
-var serviceAddress = "https://neo.sci.gsfc.nasa.gov/wms/wms?SERVICE=WMS&REQUEST=GetCapabilities&VERSION=1.3.0";
-var layerName = "MOD_LSTD_CLIM_M";
-
-var createLayer = function (xmlDom) {
-    var wms = new WorldWind.WmsCapabilities(xmlDom);
-    var wmsLayerCapabilities = wms.getNamedLayer(layerName);
-    var wmsConfig = WorldWind.WmsLayer.formLayerConfiguration(wmsLayerCapabilities);
-    var wmsLayer = new WorldWind.WmsLayer(wmsConfig);
-    wwd.addLayer(wmsLayer);
-};
-
-var logError = function (jqXhr, text, exception) {
-    console.log("There was a failure retrieving the capabilities document: " +
-        text +
-    " exception: " + exception);
-};
-
-$.get(serviceAddress).done(createLayer).fail(logError);
+  // Auto-connect on load with default value.
+  fetchUnits(true);
+})();

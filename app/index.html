@@ -1,17 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-    </head>
-    <body>
-        <canvas id="canvasOne" width="1024" height="768">
-            Your browser does not support HTML5 Canvas.
-        </canvas>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-        <script 
-        src="https://files.worldwind.arc.nasa.gov/artifactory/web/0.9.0/worldwind.min.js"
-        type="text/javascript">
-        </script>
-        <script src="WorldWind.js" type="text/javascript"></script>
-    </body>
+  <head>
+    <meta charset="utf-8" />
+    <title>SMoS WorldWind Monitor</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #000;
+        color: #f4f4f4;
+      }
+      #canvasOne {
+        width: 100vw;
+        height: 100vh;
+        display: block;
+      }
+      #hud {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        width: 320px;
+        background: rgba(0, 0, 0, 0.65);
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(3px);
+      }
+      #hud label {
+        display: block;
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+        color: #9fc2ff;
+      }
+      #hud input {
+        width: 100%;
+        padding: 6px;
+        border-radius: 4px;
+        border: 1px solid #1d4ed8;
+        background: rgba(15, 23, 42, 0.8);
+        color: #f4f4f4;
+        margin-bottom: 8px;
+      }
+      #hud button {
+        padding: 4px 8px;
+        margin-right: 4px;
+        margin-bottom: 8px;
+        border: none;
+        border-radius: 4px;
+        background: #2563eb;
+        color: #fff;
+        cursor: pointer;
+      }
+      #unitList {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 220px;
+        overflow-y: auto;
+      }
+      #unitList li {
+        font-size: 0.8rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 4px 0;
+      }
+      #statusText {
+        font-size: 0.75rem;
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvasOne">
+      Your browser does not support HTML5 Canvas.
+    </canvas>
+    <div id="hud">
+      <label for="apiInput">Base Station API</label>
+      <input
+        id="apiInput"
+        type="text"
+        value="http://localhost:8080/api/units"
+      />
+      <button id="connectBtn">Connect</button>
+      <div id="statusText">Idle</div>
+      <div id="baseInfo"></div>
+      <ul id="unitList"></ul>
+    </div>
+    <script src="https://files.worldwind.arc.nasa.gov/artifactory/web/0.9.0/worldwind.min.js"></script>
+    <script src="WorldWind.js" type="text/javascript"></script>
+  </body>
 </html>

@@ -66,6 +66,7 @@ python worldwind_auth.py
    # Edit .env with your settings
    python app.py
    ```
+   For built-in HTTPS options, see `backend-server/HTTPS_SETUP.md`.
 
 2. **Use Clients:**
    - Python: `python worldwind_auth.py`
@@ -118,6 +119,9 @@ Server running on http://localhost:5000
 ====================================
 ```
 
+If `HTTPS_ENABLED=True` is set in `.env`, the server starts on
+`https://localhost:5000` instead.
+
 ### Step 4: Test Server
 
 ```bash
@@ -147,6 +151,7 @@ from worldwind_auth import WorldWindAuth
 
 # Connect to server
 auth = WorldWindAuth('http://localhost:5000')
+# Use https://localhost:5000 when HTTPS is enabled.
 
 # Register new user
 auth.register(

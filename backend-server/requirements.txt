@@ -16,6 +16,9 @@ SQLAlchemy==2.0.23
 # Environment variables
 python-dotenv==1.0.0
 
+# TLS support for Flask/Werkzeug adhoc HTTPS certificates
+cryptography==44.0.1
+
 # Optional: PostgreSQL support (for production)
 # psycopg2-binary==2.9.9
 

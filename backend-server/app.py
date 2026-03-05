@@ -18,7 +18,21 @@ from authlib.integrations.flask_client import OAuth
 import jwt
 import datetime
 import os
+import sys
 from functools import wraps
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load .env next to this file so local runs pick up HTTPS and OAuth settings.
+load_dotenv(Path(__file__).with_name('.env'))
+
+
+def env_bool(name: str, default: bool = False) -> bool:
+    """Parse a boolean environment variable."""
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {'1', 'true', 'yes', 'on'}
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -569,6 +583,33 @@ def health():
 # ============================================================================
 
 if __name__ == '__main__':
+    host = os.environ.get('HOST', '0.0.0.0')
+    port = int(os.environ.get('PORT', '5000'))
+    debug = env_bool('DEBUG', True)
+
+    https_enabled = env_bool('HTTPS_ENABLED', False)
+    cert_file = (os.environ.get('SSL_CERT_FILE') or '').strip()
+    key_file = (os.environ.get('SSL_KEY_FILE') or '').strip()
+    ssl_context = None
+    scheme = 'http'
+
+    if https_enabled:
+        scheme = 'https'
+        if cert_file or key_file:
+            if not cert_file or not key_file:
+                print("ERROR: Set both SSL_CERT_FILE and SSL_KEY_FILE for custom TLS.")
+                sys.exit(2)
+            if not os.path.exists(cert_file):
+                print(f"ERROR: SSL_CERT_FILE does not exist: {cert_file}")
+                sys.exit(2)
+            if not os.path.exists(key_file):
+                print(f"ERROR: SSL_KEY_FILE does not exist: {key_file}")
+                sys.exit(2)
+            ssl_context = (cert_file, key_file)
+        else:
+            # Werkzeug self-signed cert mode for quick local HTTPS enablement.
+            ssl_context = 'adhoc'
+
     # Create database tables
     with app.app_context():
         db.create_all()
@@ -586,7 +627,12 @@ if __name__ == '__main__':
     print("  GET    /api/profile           - Get user profile")
     print("  GET/POST /api/travels         - Manage travels")
     print("  GET/POST /api/friends         - Manage friends")
-    print("\nServer running on http://localhost:5000")
+    print(f"\nServer running on {scheme}://localhost:{port}")
+    if https_enabled and ssl_context == 'adhoc':
+        print("HTTPS mode: adhoc self-signed certificate")
+        print("Set SSL_CERT_FILE and SSL_KEY_FILE in .env for a persistent certificate.")
+    elif https_enabled:
+        print(f"HTTPS mode: custom certificate ({cert_file})")
     print("=" * 60)
 
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=debug, host=host, port=port, ssl_context=ssl_context)
